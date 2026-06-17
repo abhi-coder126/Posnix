@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import {
+  Menu,
   LayoutDashboard,
   ShoppingCart,
   Package,
@@ -15,7 +16,6 @@ import {
   FileText,
   LogOut,
 } from "lucide-react";
-import "../css/Sidebar.css";
 
 export default function Sidebar({ onClose }) {
   const navigate = useNavigate();
@@ -55,7 +55,7 @@ export default function Sidebar({ onClose }) {
 </div>
 
         <button className="sidebar-toggle-btn" onClick={onClose} title="Hide Menu">
-          ☰
+          <Menu size={22} />
         </button>
       </div>
 

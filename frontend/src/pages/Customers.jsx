@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import API from "../api/axios";
-import "../css/Customer.css"
 const emptyCustomer = {
     name: "",
     contact: "",
@@ -97,7 +96,7 @@ export default function Customers() {
             if (showInfo) {
                 setShowInfo(false);
             }
-        } catch (error) {
+        } catch {
             alert("Delete failed");
         }
     };
@@ -137,8 +136,8 @@ export default function Customers() {
         <div className="customers-page">
             <div className="customers-head">
                 <div>
-                    <h1>Customers</h1>
-                    <p>Manage customer profiles, CRN and purchase history</p>
+                    <h1>Customer Management</h1>
+                    <p>Manage customer profiles, CRN numbers, contact details and purchase history</p>
                 </div>
             </div>
 

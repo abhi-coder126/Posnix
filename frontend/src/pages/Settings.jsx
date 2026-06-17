@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
-import "../css/Settings.css";
 
 const defaultSettings = {
   storeName: "",
@@ -55,10 +54,11 @@ export default function Settings() {
   }, []);
 
   const change = (key, value) => {
-    setSettings((prev) => ({
+      setSettings((prev) => ({
       ...prev,
       [key]: value,
     }));
+
   };
 
   const saveSettings = async () => {
@@ -78,8 +78,8 @@ export default function Settings() {
     <div className="settings-page">
       <div className="settings-head">
         <div>
-          <h1>Settings</h1>
-          <p>Store, invoice, payment and system preferences</p>
+          <h1>System Settings</h1>
+          <p>Configure store details, invoice policies, payment modes and system preferences</p>
         </div>
 
         <button onClick={saveSettings} disabled={loading}>

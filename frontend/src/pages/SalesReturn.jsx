@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
-import "../css/SalesReturn.css";
+import { ToastViewport, useToast } from "../components/Toast";
 
 export default function SalesReturn() {
   const [returns, setReturns] = useState([]);
   const [selectedReturn, setSelectedReturn] = useState(null);
+  const { toast, showToast } = useToast();
 
   const fetchReturns = async () => {
     const res = await API.get("/sales-return");
@@ -40,21 +41,22 @@ export default function SalesReturn() {
     try {
       await API.delete(`/sales-return/${selectedReturn._id}`);
 
-      alert("Sales return deleted successfully");
+      showToast("Sales return deleted successfully", "success");
 
       setSelectedReturn(null);
       fetchReturns();
     } catch (error) {
-      alert(error.response?.data?.message || "Sales return delete failed");
+      showToast(error.response?.data?.message || "Sales return delete failed");
     }
   };
 
   return (
     <div className="sales-return-page">
+      <ToastViewport toast={toast} />
       <div className="page-head">
         <div>
-          <h1>Sales Return</h1>
-          <p>View and manage returned invoices</p>
+          <h1>Sales Return / Refund</h1>
+          <p>Track returned invoices, refundable items, return quantities and stock adjustments</p>
         </div>
       </div>
 

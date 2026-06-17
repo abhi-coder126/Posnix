@@ -1,8 +1,11 @@
+const dns = require("dns");
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
 const connectDB = require("./config/db");
+const seedAdmin = require("./utils/seedAdmin");
 
 const authRoutes = require("./routes/authRoutes");
 const vendorRoutes = require("./routes/vendorRoutes");
@@ -18,7 +21,11 @@ const accountRoutes = require("./routes/accountRoutes");
 
 const app = express();
 
-connectDB();
+connectDB()
+  .then(seedAdmin)
+  .catch((error) => {
+    console.error("Database startup failed:", error.message);
+  });
 
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));

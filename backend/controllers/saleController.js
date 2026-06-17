@@ -91,7 +91,11 @@ exports.createSale = async (req, res) => {
       });
     }
 
-    const grandTotal = subTotal + gstAmount - discount;
+    const billDiscountAmount = Number(billDiscount || 0);
+    const couponDiscountAmount = Number(couponDiscount || 0);
+    const totalDiscountAmount =
+      discount + billDiscountAmount + couponDiscountAmount;
+    const grandTotal = Math.max(subTotal + gstAmount - totalDiscountAmount, 0);
 
     const cash = Number(payment?.cash || 0);
     const card = Number(payment?.card || 0);
@@ -130,11 +134,11 @@ exports.createSale = async (req, res) => {
       gstAmount,
       discount,
       grandTotal,
-      billDiscount: Number(billDiscount || 0),
+      billDiscount: billDiscountAmount,
       couponCode: couponCode || "",
-      couponDiscount: Number(couponDiscount || 0),
+      couponDiscount: couponDiscountAmount,
       discountReason: discountReason || "",
-      totalDiscount: Number(totalDiscount || discount || 0),
+      totalDiscount: Number(totalDiscount || totalDiscountAmount || 0),
       payment: { cash, card, upi, credit: pendingAmount },
       paidAmount,
       pendingAmount,

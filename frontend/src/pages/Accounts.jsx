@@ -56,8 +56,8 @@ export default function Accounts() {
     <div className="settings-page">
       <div className="settings-head">
         <div>
-          <h1>Accounts</h1>
-          <p>Manage vendor pending payments and payment history</p>
+          <h1>Accounts Payable</h1>
+          <p>Manage supplier pending balances, paid amounts and vendor payment history</p>
         </div>
       </div>
 

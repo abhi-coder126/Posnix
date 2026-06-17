@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
-import "../css/Purchase.css"
 export default function Purchase() {
   const [vendors, setVendors] = useState([]);
   const [products, setProducts] = useState([]);
@@ -388,8 +387,8 @@ export default function Purchase() {
     <div>
       <div className="page-head">
         <div>
-          <h1>Purchase / GRN</h1>
-          <p>Vendor wise stock receiving, purchase bill and stock history</p>
+          <h1>Purchase / GRN Entry</h1>
+          <p>Receive vendor stock, create purchase bills and update product cost, GST and payments</p>
         </div>
       </div>
 

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import API from "../api/axios";
-import "../css/Report.css";
 
 export default function Reports() {
   const [sales, setSales] = useState([]);
@@ -54,8 +53,8 @@ export default function Reports() {
     <div className="reports-page">
       <div className="page-head">
         <div>
-          <h1>Sales Report</h1>
-          <p>Invoice, customer, payment and sales records</p>
+          <h1>Sales Reports</h1>
+          <p>Search invoices, customer bills, payment modes, totals and complete sales history</p>
         </div>
       </div>
 

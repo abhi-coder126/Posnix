@@ -29,7 +29,7 @@ export default function SupplierBills() {
       <div className="settings-head">
         <div>
           <h1>Supplier Bills</h1>
-          <p>View all GRN supplier bills and payment status</p>
+          <p>Review GRN invoices, supplier totals, paid amounts, pending balances and status</p>
         </div>
       </div>
 

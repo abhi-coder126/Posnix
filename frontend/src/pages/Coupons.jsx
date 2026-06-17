@@ -49,8 +49,8 @@ export default function Coupons() {
     <div className="settings-page">
       <div className="settings-head">
         <div>
-          <h1>Coupon Settings</h1>
-          <p>Create and manage billing discount coupons</p>
+          <h1>Coupon Management</h1>
+          <p>Create, update and control invoice discount coupons for billing offers</p>
         </div>
       </div>
 

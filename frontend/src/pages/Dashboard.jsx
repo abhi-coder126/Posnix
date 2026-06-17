@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -14,10 +14,9 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Legend,
 } from "recharts";
 import API from "../api/axios";
-import "../css/Dashboard.css";
+import { ToastViewport, useToast } from "../components/Toast";
 
 const chartColors = ["#2563eb", "#16a34a", "#f59e0b", "#8b5cf6", "#ef4444"];
 
@@ -28,14 +27,15 @@ export default function Dashboard() {
     startDate: "",
     endDate: "",
   });
+  const { toast, showToast } = useToast();
 
-  const fetchDashboard = async () => {
+  const fetchDashboard = useCallback(async () => {
     try {
       let url = `/dashboard?filter=${filter}`;
 
       if (filter === "custom") {
         if (!dates.startDate || !dates.endDate) {
-          return alert("Start date and end date required");
+          return showToast("Start date and end date required", "warning");
         }
 
         url += `&startDate=${dates.startDate}&endDate=${dates.endDate}`;
@@ -44,15 +44,15 @@ export default function Dashboard() {
       const res = await API.get(url);
       setData(res.data);
     } catch (error) {
-      alert(error.response?.data?.message || "Dashboard fetch failed");
+      showToast(error.response?.data?.message || "Dashboard fetch failed");
     }
-  };
+  }, [dates.endDate, dates.startDate, filter, showToast]);
 
   useEffect(() => {
     if (filter !== "custom") {
       fetchDashboard();
     }
-  }, [filter]);
+  }, [fetchDashboard, filter]);
 
   if (!data) return <h2>Loading Dashboard...</h2>;
 
@@ -88,10 +88,11 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-page">
+      <ToastViewport toast={toast} />
       <div className="dashboard-header">
         <div>
-          <h1>Dashboard</h1>
-          <p>Date-wise sales, return, payment, profit and stock overview</p>
+          <h1>Business Dashboard</h1>
+          <p>Live sales, returns, payments, profit, stock alerts and billing performance overview</p>
         </div>
       </div>
 
@@ -171,7 +172,10 @@ export default function Dashboard() {
 
       <div className="dashboard-stats-grid">
         {cards.map(([title, value, type], index) => (
-          <div className="dashboard-stat-card" key={index}>
+          <div
+            className={`dashboard-stat-card ${index < 4 ? "kpi-primary" : ""}`}
+            key={index}
+          >
             <span>{title}</span>
             <h2>
               {type === "count"
@@ -207,28 +211,42 @@ export default function Dashboard() {
           {topPaymentMethod.length === 0 ? (
             <p>No data found</p>
           ) : (
-            <ResponsiveContainer width="100%" height={260}>
-              <PieChart>
-                <Pie
-                  data={topPaymentMethod}
-                  dataKey="amount"
-                  nameKey="name"
-                  outerRadius={82}
-                  innerRadius={42}
-                  paddingAngle={4}
-                  label={({ name, value }) => `${name}: ₹${Number(value || 0).toFixed(0)}`}
-                >
-                  {topPaymentMethod.map((_, index) => (
-                    <Cell
-                      key={index}
-                      fill={chartColors[index % chartColors.length]}
+            <>
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie
+                    data={topPaymentMethod}
+                    dataKey="amount"
+                    nameKey="name"
+                    outerRadius={82}
+                    innerRadius={48}
+                    paddingAngle={4}
+                  >
+                    {topPaymentMethod.map((_, index) => (
+                      <Cell
+                        key={index}
+                        fill={chartColors[index % chartColors.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => moneyFormatter(value)} />
+                </PieChart>
+              </ResponsiveContainer>
+
+              <div className="payment-method-list">
+                {topPaymentMethod.map((item, index) => (
+                  <div key={item.name || index}>
+                    <span
+                      style={{
+                        backgroundColor: chartColors[index % chartColors.length],
+                      }}
                     />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => moneyFormatter(value)} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+                    <b>{item.name}</b>
+                    <strong>{moneyFormatter(item.amount)}</strong>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
 

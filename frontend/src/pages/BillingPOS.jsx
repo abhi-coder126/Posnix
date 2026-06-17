@@ -1,7 +1,264 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye, RotateCcw } from "lucide-react";
 import API from "../api/axios";
-import "../css/BillPOS.css"
+
+const CODE128_PATTERNS = [
+  "11011001100", "11001101100", "11001100110", "10010011000", "10010001100",
+  "10001001100", "10011001000", "10011000100", "10001100100", "11001001000",
+  "11001000100", "11000100100", "10110011100", "10011011100", "10011001110",
+  "10111001100", "10011101100", "10011100110", "11001110010", "11001011100",
+  "11001001110", "11011100100", "11001110100", "11101101110", "11101001100",
+  "11100101100", "11100100110", "11101100100", "11100110100", "11100110010",
+  "11011011000", "11011000110", "11000110110", "10100011000", "10001011000",
+  "10001000110", "10110001000", "10001101000", "10001100010", "11010001000",
+  "11000101000", "11000100010", "10110111000", "10110001110", "10001101110",
+  "10111011000", "10111000110", "10001110110", "11101110110", "11010001110",
+  "11000101110", "11011101000", "11011100010", "11011101110", "11101011000",
+  "11101000110", "11100010110", "11101101000", "11101100010", "11100011010",
+  "11101111010", "11001000010", "11110001010", "10100110000", "10100001100",
+  "10010110000", "10010000110", "10000101100", "10000100110", "10110010000",
+  "10110000100", "10011010000", "10011000010", "10000110100", "10000110010",
+  "11000010010", "11001010000", "11110111010", "11000010100", "10001111010",
+  "10100111100", "10010111100", "10010011110", "10111100100", "10011110100",
+  "10011110010", "11110100100", "11110010100", "11110010010", "11011011110",
+  "11011110110", "11110110110", "10101111000", "10100011110", "10001011110",
+  "10111101000", "10111100010", "11110101000", "11110100010", "10111011110",
+  "10111101110", "11101011110", "11110101110", "11010000100", "11010010000",
+  "11010011100", "1100011101011",
+];
+
+const encodeCode128B = (value) => {
+  const text = String(value || "").trim();
+  if (!text) return "";
+
+  const codes = [104];
+  let checksum = 104;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const code = text.charCodeAt(index) - 32;
+    if (code < 0 || code > 95) continue;
+    codes.push(code);
+    checksum += code * (index + 1);
+  }
+
+  codes.push(checksum % 103, 106);
+  return codes.map((code) => CODE128_PATTERNS[code]).join("");
+};
+
+function InvoiceBarcode({ value }) {
+  const pattern = encodeCode128B(value);
+  const barWidth = 2;
+  const height = 74;
+
+  return (
+    <div className="invoice-barcode" aria-label={`Invoice barcode ${value}`}>
+      <svg
+        width={pattern.length * barWidth + 24}
+        height={height}
+        viewBox={`0 0 ${pattern.length * barWidth + 24} ${height}`}
+        role="img"
+      >
+        <rect width="100%" height="100%" fill="#ffffff" />
+        {pattern.split("").map((bit, index) => {
+          if (bit !== "1") return null;
+
+          return (
+            <rect
+              key={index}
+              x={12 + index * barWidth}
+              y="0"
+              width={barWidth}
+              height={height}
+              fill="#020617"
+            />
+          );
+        })}
+      </svg>
+      <strong>{value}</strong>
+    </div>
+  );
+}
+
+function InvoiceContent({ invoice, settings }) {
+  const paymentMode =
+    Object.entries(invoice.payment || {})
+      .filter(([, amount]) => Number(amount) > 0)
+      .map(([mode]) => mode.toUpperCase())
+      .join(" + ") || "N/A";
+
+  const invoiceDate = invoice?.createdAt
+    ? new Date(invoice.createdAt).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    })
+    : "N/A";
+
+  const invoiceTime = invoice?.createdAt
+    ? new Date(invoice.createdAt).toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    })
+    : "N/A";
+
+  return (
+    <div className="invoice-print-area">
+      <div className="invoice-title-strip">
+        <span>Original For Recipient</span>
+        <h2>Tax Invoice</h2>
+        <span>Invoice No: {invoice.invoiceNo}</span>
+      </div>
+
+      <div className="invoice-header">
+        <div className="invoice-store-block">
+          <h1>{settings?.storeName || "Posnix"}</h1>
+          {(settings?.showStoreDetails ?? true) && (
+            <>
+              <p>{settings?.storeAddress || "Inventory & Billing Management"}</p>
+              {settings?.storeContact && <p>Phone: {settings.storeContact}</p>}
+              {settings?.storeEmail && <p>Email: {settings.storeEmail}</p>}
+            </>
+          )}
+          {(settings?.showGSTDetails ?? true) && settings?.gstNumber && (
+            <p>GSTIN: {settings.gstNumber}</p>
+          )}
+        </div>
+
+        <div className="invoice-barcode-card">
+          <InvoiceBarcode value={invoice.invoiceNo} />
+          <p>Scan barcode to read invoice number</p>
+        </div>
+      </div>
+
+      <div className="invoice-meta-grid">
+        <div>
+          <span>Invoice Date</span>
+          <b>{invoiceDate}</b>
+        </div>
+        <div>
+          <span>Invoice Time</span>
+          <b>{invoiceTime}</b>
+        </div>
+        <div>
+          <span>Payment Mode</span>
+          <b>{paymentMode}</b>
+        </div>
+        <div>
+          <span>Invoice Amount</span>
+          <b>Rs {Number(invoice.grandTotal || 0).toFixed(2)}</b>
+        </div>
+      </div>
+
+      <div className="invoice-info">
+        <div>
+          <h3>Bill To</h3>
+          {(settings?.showCustomerDetails ?? true) ? (
+            <>
+              <p>Name: {invoice.customerName || "Walk-in Customer"}</p>
+              <p>Phone: {invoice.customerPhone || "N/A"}</p>
+              <p>Address: {invoice.customerAddress || "N/A"}</p>
+              {invoice.customerGST && <p>GSTIN: {invoice.customerGST}</p>}
+            </>
+          ) : (
+            <p>Customer details hidden as per invoice settings.</p>
+          )}
+        </div>
+
+        <div>
+          <h3>Invoice Details</h3>
+          <p>Invoice No: {invoice.invoiceNo}</p>
+          <p>Generated: {invoiceDate}, {invoiceTime}</p>
+          <p>Place of Supply: {settings?.storeAddress || "N/A"}</p>
+          <p>Status: Paid / Generated</p>
+        </div>
+      </div>
+
+      <table className="invoice-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Product</th>
+            <th>Barcode</th>
+            <th>Qty</th>
+            <th>Rate</th>
+            <th>GST</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {invoice.products?.map((p, index) => (
+            <tr key={`${p.barcode || p.name}-${index}`}>
+              <td>{index + 1}</td>
+              <td>{p.name}</td>
+              <td>{p.barcode}</td>
+              <td>{p.qty}</td>
+              <td>Rs {Number(p.rate || 0).toFixed(2)}</td>
+              <td>{p.gst}%</td>
+              <td>Rs {Number(p.total || 0).toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="invoice-summary-row">
+        <div className="invoice-policy-box">
+          {(settings?.showTerms ?? true) && (
+            <div>
+              <h3>Terms & Conditions</h3>
+              <p>
+                {settings?.termsAndConditions ||
+                  "Goods once sold will be accepted for return or exchange only as per store policy and with the original invoice."}
+              </p>
+            </div>
+          )}
+          {(settings?.showReturnPolicy ?? true) && (
+            <div>
+              <h3>Return Policy</h3>
+              <p>
+                {settings?.returnPolicy ||
+                  "Returns are subject to product condition, returnable quantity and store approval."}
+              </p>
+            </div>
+          )}
+          <div>
+            <h3>Privacy Policy</h3>
+            <p>
+              Customer details printed on this invoice are used only for billing,
+              service, warranty and statutory record purposes.
+            </p>
+          </div>
+        </div>
+
+        <div className="invoice-total">
+          <p><span>Subtotal</span><b>Rs {Number(invoice.subTotal || 0).toFixed(2)}</b></p>
+          <p><span>GST</span><b>Rs {Number(invoice.gstAmount || 0).toFixed(2)}</b></p>
+          <p><span>Product Discount</span><b>Rs {Number(invoice.discount || 0).toFixed(2)}</b></p>
+          <p><span>Bill Discount</span><b>Rs {Number(invoice.billDiscount || 0).toFixed(2)}</b></p>
+          <p><span>Coupon Discount</span><b>Rs {Number(invoice.couponDiscount || 0).toFixed(2)}</b></p>
+          <p><span>Total Discount</span><b>Rs {Number(invoice.totalDiscount || 0).toFixed(2)}</b></p>
+          <h2>
+            <span>Grand Total</span>
+            <b>Rs {Number(invoice.grandTotal || 0).toFixed(2)}</b>
+          </h2>
+        </div>
+      </div>
+
+      <div className="invoice-footer">
+        {(settings?.showThankYou ?? true) && (
+          <p>{settings?.thankYouMessage || "Thank you for shopping with us."}</p>
+        )}
+        <div>
+          <span>Authorized Signatory</span>
+          <b>{settings?.storeName || "Posnix"}</b>
+        </div>
+        <small>This is a computer generated invoice. Powered by Posnix.</small>
+      </div>
+    </div>
+  );
+}
 
 export default function BillingPOS() {
   const navigate = useNavigate();
@@ -406,6 +663,7 @@ export default function BillingPOS() {
           barcode: p.barcode,
           soldQty: p.qty,
           returnQty: 0,
+          returnableQty: Number(p.returnableQty ?? p.qty ?? 0),
           rate: p.rate,
           gst: p.gst,
         }))
@@ -421,8 +679,8 @@ export default function BillingPOS() {
     const updated = [...returnItems];
     const qty = Number(value);
 
-    if (qty > Number(updated[index].soldQty)) {
-      return showToast("Return qty sold qty se zyada nahi ho sakti", "warning");
+    if (qty > Number(updated[index].returnableQty ?? updated[index].soldQty)) {
+      return showToast("Return qty available return qty se zyada nahi ho sakti", "warning");
     }
 
     updated[index].returnQty = qty;
@@ -465,7 +723,7 @@ export default function BillingPOS() {
 
   const printLastBill = () => {
     if (!lastInvoice) return showToast("Last invoice not found", "warning");
-    setShowLastInvoice(true);
+    window.print();
   };
 
   return (<>
@@ -478,8 +736,18 @@ export default function BillingPOS() {
       <div className="pos-topbar">
         <button onClick={() => navigate("/")}>Home</button>
 
-        <div>
-          <h1>Billing / POS</h1>
+        <div className="pos-title-block">
+          <button
+            className="view-last-invoice-btn"
+            onClick={() =>
+              lastInvoice
+                ? setShowLastInvoice(true)
+                : showToast("Last invoice not found", "warning")
+            }
+          >
+            <Eye size={16} />
+            View Last Transaction
+          </button>
         </div>
 
         <div className="sale-return-top">
@@ -489,7 +757,10 @@ export default function BillingPOS() {
             onChange={(e) => setReturnInvoiceNo(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && fetchReturnInvoice()}
           />
-          <button onClick={fetchReturnInvoice}>Sale Return</button>
+          <button onClick={fetchReturnInvoice}>
+            <RotateCcw size={17} />
+            Return
+          </button>
         </div>
       </div>
 
@@ -690,7 +961,7 @@ export default function BillingPOS() {
               <b>₹{totalDiscount.toFixed(2)}</b>
             </p>
 
-            <h3>₹{grandTotal.toFixed(2)}</h3>
+            <h3>Total Bill: ₹{grandTotal.toFixed(2)}</h3>
           </div>
 
           <div className="pos-last-invoice">
@@ -716,6 +987,11 @@ export default function BillingPOS() {
       </div>
 
       <div className="pos-bottom-payment">
+        <div className="payment-total-strip">
+          <span>Total Bill</span>
+          <strong>₹{grandTotal.toFixed(2)}</strong>
+        </div>
+
         {(settings?.cashEnabled ?? true) && (
           <button onClick={() => openPayment("Cash")}>Cash</button>
         )}
@@ -876,6 +1152,7 @@ export default function BillingPOS() {
                   <th>Product</th>
                   <th>Barcode</th>
                   <th>Sold Qty</th>
+                  <th>Returnable</th>
                   <th>Return Qty</th>
                   <th>Rate</th>
                   <th>GST</th>
@@ -898,12 +1175,13 @@ export default function BillingPOS() {
                     <td>{item.name}</td>
                     <td>{item.barcode}</td>
                     <td>{item.soldQty}</td>
+                    <td>{item.returnableQty}</td>
 
                     <td>
                       <input
                         type="number"
                         min="0"
-                        max={item.soldQty}
+                        max={item.returnableQty}
                         value={item.returnQty}
                         onChange={(e) => updateReturnQty(index, e.target.value)}
                       />
@@ -925,13 +1203,15 @@ export default function BillingPOS() {
 
       {showLastInvoice && lastInvoice && (
         <div className="pos-modal-overlay">
-          <div className="pos-modal large invoice-modal">
+          <div className="pos-modal large invoice-modal last-invoice-modal">
             <div className="pos-modal-head no-print">
               <h2>Latest Invoice</h2>
               <button onClick={() => setShowLastInvoice(false)}>×</button>
             </div>
 
-            <div className="invoice-print-area">
+            <InvoiceContent invoice={lastInvoice} settings={settings} />
+
+            <div className="invoice-print-area legacy-invoice">
               <div className="invoice-header">
                 <div>
                   <h1>{settings?.storeName || "Posnix"}</h1>

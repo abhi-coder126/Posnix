@@ -14,7 +14,10 @@ export default function Login() {
     e.preventDefault();
 
     try {
-      const res = await API.post("/auth/login", form);
+      const res = await API.post("/auth/login", {
+        email: form.email.trim(),
+        password: form.password,
+      });
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
       navigate("/");
@@ -26,8 +29,8 @@ export default function Login() {
   return (
     <div className="login-page">
       <form className="login-card" onSubmit={login}>
-        <h1>Posnix Login</h1>
-        <p>Inventory, GRN & Billing Management</p>
+        <h1>Posnix Billing Login</h1>
+        <p>Secure access for POS billing, inventory, GRN and business reports</p>
 
         <input
           type="email"
@@ -44,6 +47,9 @@ export default function Login() {
         />
 
         <button>Login</button>
+        <div className="login-hint">
+          Email: admin@posnix.com | Password: posnix@1122
+        </div>
       </form>
     </div>
   );

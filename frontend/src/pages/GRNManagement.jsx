@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import API from "../api/axios";
-import "../css/GRNManagement.css";
 export default function GRNManagement() {
     const [purchases, setPurchases] = useState([]);
     const [selectedGRN, setSelectedGRN] = useState(null);
@@ -162,8 +161,8 @@ export default function GRNManagement() {
                     <span className="grn-kicker">Purchase Control</span>
                     <h1>GRN Management</h1>
                     <p>
-                        View GRN details, edit stock quantity, update pricing, GST and
-                        vendor payments.
+                        Review received stock, edit purchase quantities, update GST,
+                        pricing and vendor payments.
                     </p>
                 </div>
 
@@ -211,8 +210,8 @@ export default function GRNManagement() {
             <div className="grn-panel">
                 <div className="grn-panel-head">
                     <div>
-                        <h2>All GRN / Purchases</h2>
-                        <p>Search by vendor name, invoice number or amount.</p>
+                        <h2>GRN & Purchase Records</h2>
+                        <p>Search and manage vendor GRNs by supplier name, invoice number or bill amount.</p>
                     </div>
 
                     <div className="grn-search-box">

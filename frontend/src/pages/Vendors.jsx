@@ -37,8 +37,8 @@ export default function Vendors() {
     <div>
       <div className="page-head">
         <div>
-          <h1>Vendors</h1>
-          <p>Manage vendor purchases and payments</p>
+          <h1>Vendor Management</h1>
+          <p>Manage supplier profiles, GST details, opening balances, purchases and payments</p>
         </div>
       </div>
 

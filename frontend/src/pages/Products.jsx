@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { Eye, Info as InfoIcon, Pencil, Trash2 } from "lucide-react";
 import API from "../api/axios";
-import "../css/Products.css"
+import { ToastViewport, useToast } from "../components/Toast";
 const emptyForm = {
   name: "",
   vendorId: "",
@@ -30,6 +31,7 @@ export default function Products() {
   const [showInfo, setShowInfo] = useState(false);
   const [showView, setShowView] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const { toast, showToast } = useToast();
 
   const fetchAll = async () => {
     const p = await API.get("/products");
@@ -66,14 +68,19 @@ export default function Products() {
 
     const vendor = vendors.find((v) => v._id === form.vendorId);
 
-    await API.post("/products", {
-      ...form,
-      vendorName: vendor?.name || "",
-    });
+    try {
+      await API.post("/products", {
+        ...form,
+        vendorName: vendor?.name || "",
+      });
 
-    setForm(emptyForm);
-    setShowAdd(false);
-    fetchAll();
+      showToast("Product saved successfully", "success");
+      setForm(emptyForm);
+      setShowAdd(false);
+      fetchAll();
+    } catch (error) {
+      showToast(error.response?.data?.message || "Product save failed");
+    }
   };
 
   const openEdit = (product) => {
@@ -104,16 +111,21 @@ export default function Products() {
 
     const vendor = vendors.find((v) => v._id === form.vendorId);
 
-    await API.put(`/products/${selectedProduct._id}`, {
-      ...form,
-      vendorName: vendor?.name || form.vendorName,
-      stock: selectedProduct.stock,
-    });
+    try {
+      await API.put(`/products/${selectedProduct._id}`, {
+        ...form,
+        vendorName: vendor?.name || form.vendorName,
+        stock: selectedProduct.stock,
+      });
 
-    setShowEdit(false);
-    setSelectedProduct(null);
-    setForm(emptyForm);
-    fetchAll();
+      showToast("Product updated successfully", "success");
+      setShowEdit(false);
+      setSelectedProduct(null);
+      setForm(emptyForm);
+      fetchAll();
+    } catch (error) {
+      showToast(error.response?.data?.message || "Product update failed");
+    }
   };
 
   const deleteProduct = async () => {
@@ -125,11 +137,16 @@ export default function Products() {
 
     if (!ok) return;
 
-    await API.delete(`/products/${selectedProduct._id}`);
+    try {
+      await API.delete(`/products/${selectedProduct._id}`);
 
-    setShowInfo(false);
-    setSelectedProduct(null);
-    fetchAll();
+      showToast("Product deleted successfully", "success");
+      setShowInfo(false);
+      setSelectedProduct(null);
+      fetchAll();
+    } catch (error) {
+      showToast(error.response?.data?.message || "Product delete failed");
+    }
   };
 
   const formatDateTime = (date) => {
@@ -147,10 +164,11 @@ export default function Products() {
 
   return (
     <div className="products-page">
+      <ToastViewport toast={toast} />
       <div className="products-head">
         <div>
-          <h1>Products</h1>
-          <p>Manage products, barcode, stock, GST and pricing</p>
+          <h1>Product Management</h1>
+          <p>Add and manage product barcodes, categories, GST, pricing and stock rules</p>
         </div>
       </div>
 
@@ -203,8 +221,10 @@ export default function Products() {
               searchedProducts.map((p) => (
                 <tr key={p._id}>
                   <td>
-                    <b>{p.name}</b>
-                    <small>{p.category || "No Category"}</small>
+                    <div className="product-name-stack">
+                      <b>{p.name}</b>
+                      <small>{p.category || "No Category"}</small>
+                    </div>
                   </td>
                   <td>{p.barcode}</td>
                   <td>
@@ -225,28 +245,37 @@ export default function Products() {
                   <td>
                     <button
                       className="icon-info"
+                      title="Product info"
+                      aria-label={`Product info for ${p.name}`}
                       onClick={() => {
                         setSelectedProduct(p);
                         setShowInfo(true);
                       }}
                     >
-                      i
+                      <InfoIcon size={16} />
                     </button>
                   </td>
                   <td>
-                    <button className="icon-edit" onClick={() => openEdit(p)}>
-                      ✎
+                    <button
+                      className="icon-edit"
+                      title="Edit product"
+                      aria-label={`Edit ${p.name}`}
+                      onClick={() => openEdit(p)}
+                    >
+                      <Pencil size={16} />
                     </button>
                   </td>
                   <td>
                     <button
                       className="icon-view"
+                      title="View product"
+                      aria-label={`View ${p.name}`}
                       onClick={() => {
                         setSelectedProduct(p);
                         setShowView(true);
                       }}
                     >
-                      👁
+                      <Eye size={16} />
                     </button>
                   </td>
                 </tr>
@@ -294,6 +323,7 @@ export default function Products() {
             <p>Last Updated: {formatDateTime(selectedProduct.updatedAt)}</p>
 
             <button className="delete-product-btn" onClick={deleteProduct}>
+              <Trash2 size={17} />
               Delete Product
             </button>
           </div>
