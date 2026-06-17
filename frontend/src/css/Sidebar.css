@@ -1,0 +1,162 @@
+.sidebar {
+    width: 220px;
+    height: 100vh;
+    background: #081224;
+    color: #ffffff;
+    padding: 20px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex-shrink: 0;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.sidebar-brand h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.sidebar-brand p {
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+.sidebar-toggle-btn {
+    width: 55px;
+    height: 58px;
+    border: 0;
+    border-radius: 10px;
+    background: #081224;
+    color: #ffffff;
+    font-size: 24px;
+    cursor: pointer;
+    margin: 3px 0 0 3px;
+    flex-shrink: 0;
+}
+
+.sidebar-toggle-btn:hover {
+    background: #2563eb;
+}
+
+.show-sidebar-btn {
+    width: 58px;
+    height: 58px;
+    border: 0;
+    border-radius: 10px;
+    background: #081224;
+    color: #ffffff;
+    font-size: 25px;
+    cursor: pointer;
+    margin: 5px 0 0 5px;
+    flex-shrink: 0;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar-link,
+.sidebar-logout {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 16px;
+    text-decoration: none;
+    color: #ffffff;
+    background: #17253b;
+    border-radius: 12px;
+    border: 0;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: 0.25s ease;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+    background: #2563eb;
+}
+
+.sidebar-link svg,
+.sidebar-logout svg {
+    flex-shrink: 0;
+}
+
+.sidebar-logout {
+    background: #dc2626;
+    margin-top: 20px;
+    justify-content: flex-start;
+}
+
+.sidebar-logout:hover {
+    background: #b91c1c;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 200px;
+        padding: 16px;
+    }
+
+    .sidebar-brand h2 {
+        font-size: 22px;
+    }
+
+    .sidebar-link,
+    .sidebar-logout {
+        padding: 12px;
+        font-size: 14px;
+    }
+}
+
+.app-layout.sidebar-closed {
+    display: block !important;
+}
+
+.app-layout.sidebar-closed .main-content {
+    width: 100vw !important;
+    max-width: 95vw !important;
+    margin: 0 !important;
+    margin-left: 3rem !important;
+    padding: -16px !important;
+}
+
+.show-sidebar-btn {
+    position: fixed !important;
+    top: 10px !important;
+    left: 5px !important;
+    z-index: 99999 !important;
+    margin: 0 !important;
+}
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-logo {
+  width: 160px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}

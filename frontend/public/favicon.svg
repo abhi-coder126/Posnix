@@ -1,0 +1,49 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="green" x1="130" y1="170" x2="300" y2="320" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8EEA3E"/>
+      <stop offset="1" stop-color="#2DAA31"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="300" y1="190" x2="420" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFD231"/>
+      <stop offset="1" stop-color="#F28A13"/>
+    </linearGradient>
+    <filter id="shadow" x="40" y="40" width="430" height="430" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#132033" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <!-- receipt -->
+    <path d="M137 71l18 12 18-12 18 12 18-12 18 12 18-12 18 12v101H137V71z" fill="#F8FAFC" stroke="#25384F" stroke-width="14" stroke-linejoin="round"/>
+    <path d="M168 121h63M168 154h74" stroke="#25384F" stroke-width="12" stroke-linecap="round" opacity=".75"/>
+
+    <!-- terminal body -->
+    <rect x="93" y="146" width="205" height="298" rx="36" fill="#25384F"/>
+    <rect x="117" y="171" width="157" height="99" rx="16" fill="url(#green)" stroke="#101827" stroke-width="10"/>
+
+    <!-- check mark -->
+    <path d="M156 221l31 31 61-72" stroke="#fff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- keypad -->
+    <g fill="#020817">
+      <circle cx="139" cy="312" r="12"/><circle cx="194" cy="312" r="12"/><circle cx="249" cy="312" r="12"/>
+      <circle cx="139" cy="354" r="12"/><circle cx="194" cy="354" r="12"/><circle cx="249" cy="354" r="12"/>
+      <circle cx="139" cy="396" r="12"/><circle cx="194" cy="396" r="12"/><circle cx="249" cy="396" r="12"/>
+    </g>
+
+    <!-- sales bars -->
+    <rect x="306" y="264" width="48" height="153" rx="10" fill="url(#orange)"/>
+    <rect x="365" y="205" width="48" height="212" rx="10" fill="url(#orange)"/>
+    <rect x="424" y="146" width="48" height="271" rx="10" fill="url(#orange)"/>
+
+    <!-- rising base curve -->
+    <path d="M83 392C178 445 325 441 458 345" stroke="#25384F" stroke-width="24" stroke-linecap="round"/>
+    <path d="M91 421C202 481 355 463 472 375" stroke="#1B2C42" stroke-width="14" stroke-linecap="round" opacity=".9"/>
+
+    <!-- wireless signal -->
+    <path d="M294 85c60 5 108 44 134 97" stroke="#FF9F1A" stroke-width="18" stroke-linecap="round"/>
+    <path d="M303 126c42 4 74 29 93 66" stroke="#FF9F1A" stroke-width="18" stroke-linecap="round"/>
+    <path d="M311 165c25 3 45 18 57 40" stroke="#FF9F1A" stroke-width="18" stroke-linecap="round"/>
+  </g>
+</svg>
