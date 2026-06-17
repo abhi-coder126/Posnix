@@ -47,9 +47,6 @@ export default function Login() {
         />
 
         <button>Login</button>
-        <div className="login-hint">
-          Email: admin@posnix.com | Password: posnix@1122
-        </div>
       </form>
     </div>
   );
